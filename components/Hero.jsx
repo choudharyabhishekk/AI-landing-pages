@@ -5,15 +5,26 @@ import Lookup from "@/data/Lookup";
 import { ArrowRight } from "lucide-react";
 import { useContext, useState } from "react";
 import Login from "./LoginDialog";
+import { useMutation } from "convex/react";
+import { useRouter } from "next/navigation";
+import { api } from "@/convex/_generated/api";
 
 export default function Hero() {
+  const router = useRouter();
   const [userInput, setUserInput] = useState();
   const [openDialog, setOpenDialog] = useState(false);
-
+  const CreateWorkspace = useMutation(api.workspace.CreateWorkspace);
   const { messages, setMessages } = useContext(MessagesContext);
   const { userDetail, setUserDetail } = useContext(UserContext);
-  const userPrompt = (input) => {
-    setMessages({ role: "user", content: input });
+  const userPrompt = async (input) => {
+    const userMessages = { role: "user", content: input };
+    setMessages(userMessages);
+    const workspaceId = await CreateWorkspace({
+      user: userDetail._id,
+      messages: [userMessages],
+    });
+    console.log(workspaceId);
+    router.push("/workspace/" + workspaceId);
   };
   return (
     <div className="flex flex-col items-center mt-24 gap-2 ">
