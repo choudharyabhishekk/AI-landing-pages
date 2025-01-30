@@ -1,5 +1,5 @@
-import { defineSchema, defineTable } from "convex/server";
-import { v } from "convex/values";
+import { defineSchema, defineTable } from 'convex/server'
+import { v } from 'convex/values'
 
 export default defineSchema({
   users: defineTable({
@@ -7,10 +7,11 @@ export default defineSchema({
     email: v.string(),
     picture: v.string(),
     uid: v.string(),
+    token: v.optional(v.number())
   }),
   workspace: defineTable({
-    messages: v.any(),
+    messages: v.any(), //to save json object
     fileData: v.optional(v.any()),
-    user: v.id("users"),
-  }),
-});
+    user: v.id('users')
+  })
+})

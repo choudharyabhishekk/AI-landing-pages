@@ -7,49 +7,40 @@ export const CreateUser = mutation({
     email: v.string(),
     picture: v.string(),
     uid: v.string(),
+    token: v.optional(v.number())
   },
   handler: async (ctx, args) => {
-    try {
-      // Log incoming data
-      console.log("[CreateUser] Received args:", args);
-
-      // Check if user exists - using unique email
-      const existingUsers = await ctx.db
-        .query("users")
-        .filter((q) => q.eq(q.field("email"), args.email))
-        .collect();
-
-      if (existingUsers.length > 0) {
-        const existingUser = existingUsers[0];
-
-        return existingUser;
-      }
-
-      // Insert new user
-      const userData = {
+    const user = await ctx.db.query('users').filter((q) => q.eq(q.field('email'), args.email)).collect()
+    console.log(user)
+    if (user.length === 0) {
+      const res = await ctx.db.insert('users', {
         name: args.name,
         email: args.email,
         picture: args.picture,
         uid: args.uid,
-      };
-
-      const newUser = await ctx.db.insert("users", userData);
-
-      return newUser;
-    } catch (error) {
-      console.error("[CreateUser] Error in mutation:", error);
-      throw error;
+        token: args.token ?? 50000
+      });
     }
-  },
-});
+  }
+})
 
 export const GetUser = query({
-  args: { email: v.string() },
-  handler: async (ctx, args) => {
-    const user = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("email"), args.email))
-      .collect();
-    return user[0];
+  args: {
+    email: v.string()
   },
-});
+  handler: async (ctx, args) => {
+    const user = await ctx.db.query('users').filter((q) => q.eq(q.field('email'), args.email)).collect()
+    return user[0];
+  }
+})
+
+export const UpdateTokenCount = mutation({
+  args: { userId: v.id('users'), token: v.number() },
+  handler: async (ctx, args) => {
+    const result = await ctx.db.patch(args.userId, {
+      token: args.token
+    });
+    console.log(result);
+    return result;
+  }
+})  
